@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Check, ChevronsUpDown, Pencil, Trash2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import ConfirmModal from '@/app/admin/ConfirmModal'
 import { toast } from 'sonner'
 
@@ -370,9 +371,22 @@ export default function ProductosList({
         )}
       </div>
 
+      <AnimatePresence>
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 my-8">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 p-4 overflow-y-auto"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 14 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 14 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 my-8"
+          >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-800">
                 {editando ? 'Editar producto' : 'Nuevo producto'}
@@ -481,9 +495,10 @@ export default function ProductosList({
                 </Button>
               </div>
             </form>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       <ConfirmModal
         open={confirm !== null}

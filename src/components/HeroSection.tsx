@@ -17,8 +17,8 @@ export function HeroSection({ whatsappNumber, heroImagen }: { whatsappNumber: st
     <section className="relative w-full h-[420px] md:h-[560px] bg-brand-100 overflow-hidden flex items-center">
       {heroImagen ? (
         <>
-          <Image src={heroImagen} alt="Banner" fill className="object-cover" priority sizes="100vw" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent z-10" />
+          <Image src={heroImagen} alt="Banner" fill className="object-cover object-center" priority sizes="100vw" />
+          <div className="absolute inset-0 bg-black/70 z-10" />
         </>
       ) : (
         <>

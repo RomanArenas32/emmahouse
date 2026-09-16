@@ -6,6 +6,7 @@ import { crearCategoria, actualizarCategoria, eliminarCategoria } from '@/app/ac
 import { useRouter } from 'next/navigation'
 import ConfirmModal from '@/app/admin/ConfirmModal'
 import { Pencil, Trash2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import { toast } from 'sonner'
 
 const DRAFT_KEY = 'emmahouse_draft_categoria'
@@ -171,9 +172,22 @@ export default function CategoriasList({ categorias }: { categorias: Categoria[]
         )}
       </div>
 
+      <AnimatePresence>
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 14 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 14 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+          >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-800">
                 {editando ? 'Editar categoría' : 'Nueva categoría'}
@@ -210,9 +224,10 @@ export default function CategoriasList({ categorias }: { categorias: Categoria[]
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       <ConfirmModal
         open={confirmId !== null}

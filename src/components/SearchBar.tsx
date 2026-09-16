@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Search, X } from 'lucide-react'
 
 export default function SearchBar({ initialValue = '' }: { initialValue?: string }) {
@@ -9,11 +9,13 @@ export default function SearchBar({ initialValue = '' }: { initialValue?: string
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [value, setValue] = useState(initialValue)
+  const [prevInitial, setPrevInitial] = useState(initialValue)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
+  if (prevInitial !== initialValue) {
+    setPrevInitial(initialValue)
     setValue(initialValue)
-  }, [initialValue])
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const q = e.target.value

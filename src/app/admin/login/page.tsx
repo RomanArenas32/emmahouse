@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { motion } from 'motion/react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -28,7 +29,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        className="bg-white rounded-2xl shadow-md p-8 w-full max-w-sm"
+      >
         <div className="text-center mb-8">
           <div className="w-12 h-12 rounded-full bg-brand-600 flex items-center justify-center text-white font-bold text-xl mx-auto mb-3">
             E
@@ -77,7 +83,7 @@ export default function LoginPage() {
             {isPending ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
-      </div>
+      </motion.div>
     </div>
   )
 }

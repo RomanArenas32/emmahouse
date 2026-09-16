@@ -1,5 +1,7 @@
 'use client'
 
+import { motion, AnimatePresence } from 'motion/react'
+
 type Variant = 'default' | 'warning'
 
 export default function ConfirmModal({
@@ -23,11 +25,23 @@ export default function ConfirmModal({
   onCancel: () => void
   isPending?: boolean
 }) {
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60] p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-5">
+    <AnimatePresence>
+      {open && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60] p-4"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-5"
+      >
         <div className="flex gap-3 items-start">
           {variant === 'warning' && (
             <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
@@ -62,7 +76,9 @@ export default function ConfirmModal({
             {isPending ? 'Procesando...' : confirmLabel}
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

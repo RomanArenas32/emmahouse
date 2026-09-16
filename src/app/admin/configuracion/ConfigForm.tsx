@@ -6,6 +6,7 @@ import { guardarConfiguracion } from '@/app/actions/configuracion'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { motion } from 'motion/react'
 
 export default function ConfigForm({ config }: { config: Record<string, string> }) {
   const [isPending, startTransition] = useTransition()
@@ -49,7 +50,13 @@ export default function ConfigForm({ config }: { config: Record<string, string> 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-lg flex flex-col gap-6">
+    <motion.form
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+      onSubmit={handleSubmit}
+      className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-lg flex flex-col gap-6"
+    >
       <input type="hidden" name="hero_imagen" value={heroImagen} />
 
       <div>
@@ -122,6 +129,6 @@ export default function ConfigForm({ config }: { config: Record<string, string> 
       >
         {isPending ? 'Guardando...' : 'Guardar cambios'}
       </button>
-    </form>
+    </motion.form>
   )
 }

@@ -28,11 +28,13 @@ export default function ProductosGrid({
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   // Reset cuando cambia la categoría o búsqueda
-  useEffect(() => {
+  const [prevFilter, setPrevFilter] = useState({ categoriaId, buscar })
+  if (prevFilter.categoriaId !== categoriaId || prevFilter.buscar !== buscar) {
+    setPrevFilter({ categoriaId, buscar })
     setProductos(initialProductos)
     setHasMore(initialHasMore)
     setPage(1)
-  }, [initialProductos, initialHasMore, categoriaId, buscar])
+  }
 
   // IntersectionObserver para cargar más
   useEffect(() => {
@@ -59,7 +61,7 @@ export default function ProductosGrid({
     const el = sentinelRef.current
     if (el) observer.observe(el)
     return () => { if (el) observer.unobserve(el) }
-  }, [hasMore, isPending, page, categoriaId])
+  }, [hasMore, isPending, page, categoriaId, buscar])
 
   const gridKey = `${categoriaId ?? 'all'}-${buscar ?? ''}`
 
