@@ -51,7 +51,7 @@ export function HeroSection({ whatsappNumber, heroImagen }: { whatsappNumber: st
       </section>
 
       {/* ── Desktop ── */}
-      <section className="hidden md:flex relative w-full h-[560px] bg-brand-100 overflow-hidden items-center">
+      <section className="hidden md:flex relative w-full h-[560px] bg-brand-100 overflow-hidden items-start">
         {heroImagen ? (
           <>
             <Image src={heroImagen} alt="Banner" fill className="object-cover object-center" priority sizes="100vw" />
@@ -66,7 +66,7 @@ export function HeroSection({ whatsappNumber, heroImagen }: { whatsappNumber: st
           </>
         )}
         <motion.div
-          className="relative z-20 max-w-6xl mx-auto px-16"
+          className="relative z-20 max-w-6xl mx-auto px-16 pt-16"
           variants={container}
           initial="hidden"
           animate="show"
@@ -80,15 +80,6 @@ export function HeroSection({ whatsappNumber, heroImagen }: { whatsappNumber: st
           >
             Todo para tu hogar
           </motion.h1>
-          <motion.a
-            variants={item}
-            href={ctaHref}
-            target={whatsappNumber ? '_blank' : undefined}
-            rel="noopener noreferrer"
-            className={`inline-block px-8 py-3 text-xs tracking-widest uppercase font-medium transition-colors ${heroImagen ? 'border border-white text-white hover:bg-white hover:text-brand-900' : 'border border-brand-800 text-brand-800 hover:bg-brand-800 hover:text-white'}`}
-          >
-            Consultar
-          </motion.a>
         </motion.div>
       </section>
     </>
