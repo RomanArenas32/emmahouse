@@ -13,7 +13,7 @@ export default function ProductoGallery({ imagenes, nombre }: { imagenes: string
         className="aspect-square bg-brand-50 flex items-center justify-center text-brand-200"
         initial={{ opacity: 0, x: -24 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.8}
@@ -28,7 +28,7 @@ export default function ProductoGallery({ imagenes, nombre }: { imagenes: string
       className="flex flex-col gap-3"
       initial={{ opacity: 0, x: -24 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
     >
       {/* Imagen principal */}
       <div className="relative aspect-square bg-white border border-brand-100 overflow-hidden">

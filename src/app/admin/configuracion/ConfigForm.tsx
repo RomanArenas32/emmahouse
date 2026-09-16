@@ -53,7 +53,7 @@ export default function ConfigForm({ config }: { config: Record<string, string> 
     <motion.form
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
       onSubmit={handleSubmit}
       className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-lg flex flex-col gap-6"
     >

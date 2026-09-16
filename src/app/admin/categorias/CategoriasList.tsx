@@ -185,7 +185,7 @@ export default function CategoriasList({ categorias }: { categorias: Categoria[]
             initial={{ opacity: 0, scale: 0.96, y: 14 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 14 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
             className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
           >
             <div className="flex items-center justify-between mb-4">

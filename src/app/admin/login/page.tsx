@@ -32,7 +32,7 @@ export default function LoginPage() {
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
         className="bg-white rounded-2xl shadow-md p-8 w-full max-w-sm"
       >
         <div className="text-center mb-8">

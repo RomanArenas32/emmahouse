@@ -39,7 +39,7 @@ export default function ConfirmModal({
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
         className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-5"
       >
         <div className="flex gap-3 items-start">

@@ -32,7 +32,7 @@ export function ProductCard({
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.5, delay: (index % 4) * 0.07, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration: 0.5, delay: (index % 4) * 0.07, ease: 'easeOut' }}
     >
       {/* Imagen */}
       <Link href={`/productos/${producto.id}`} className="block relative aspect-square bg-white overflow-hidden">
