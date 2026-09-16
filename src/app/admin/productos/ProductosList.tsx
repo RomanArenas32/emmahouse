@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import type { Categoria, Producto } from '@/lib/supabase/types'
 import { crearProducto, actualizarProducto, eliminarProducto, toggleActivo } from '@/app/actions/productos'
-import { useRouter } from 'next/navigation'
+import { fetchProductosAdmin } from '@/app/actions/productos-admin'
 import ImageUpload from './ImageUpload'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -139,29 +139,94 @@ function CategoriaCombobox({
 }
 
 export default function ProductosList({
-  productos,
+  initialProductos,
+  initialHasMore,
   categorias,
 }: {
-  productos: ProductoConCategoria[]
+  initialProductos: ProductoConCategoria[]
+  initialHasMore: boolean
   categorias: Categoria[]
 }) {
+  // Form state
   const [showForm, setShowForm] = useState(false)
   const [editando, setEditando] = useState<ProductoConCategoria | null>(null)
   const [draft, setDraft] = useState<Draft>(DRAFT_VACIO)
   const [isPending, startTransition] = useTransition()
-  const [buscar, setBuscar] = useState('')
-  const router = useRouter()
 
   type Confirm = { tipo: 'toggle'; producto: ProductoConCategoria } | { tipo: 'delete'; id: string }
   const [confirm, setConfirm] = useState<Confirm | null>(null)
 
-  const productosFiltrados = buscar.trim()
-    ? productos.filter((p) =>
-        p.nombre.toLowerCase().includes(buscar.toLowerCase()) ||
-        p.categoria?.nombre.toLowerCase().includes(buscar.toLowerCase()) ||
-        p.descripcion?.toLowerCase().includes(buscar.toLowerCase())
-      )
-    : productos
+  // List state
+  const [listProductos, setListProductos] = useState(initialProductos)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [page, setPage] = useState(1)
+  const [buscarInput, setBuscarInput] = useState('')
+  const [buscarQuery, setBuscarQuery] = useState('')
+  const [categoriaFiltro, setCategoriaFiltro] = useState('')
+  const [isPendingFilter, startFilterTransition] = useTransition()
+  const [isPendingMore, startMoreTransition] = useTransition()
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const isFirstRender = useRef(true)
+
+  // Debounce search input
+  useEffect(() => {
+    const t = setTimeout(() => setBuscarQuery(buscarInput), 400)
+    return () => clearTimeout(t)
+  }, [buscarInput])
+
+  // Reset list when filter changes
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    startFilterTransition(async () => {
+      const { productos: fresh, hasMore: more } = await fetchProductosAdmin({
+        categoriaId: categoriaFiltro || undefined,
+        buscar: buscarQuery || undefined,
+        page: 0,
+      })
+      setListProductos(fresh)
+      setHasMore(more)
+      setPage(1)
+    })
+  }, [buscarQuery, categoriaFiltro])
+
+  // Infinite scroll
+  useEffect(() => {
+    if (!hasMore || isPendingMore || isPendingFilter) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          startMoreTransition(async () => {
+            const { productos: more, hasMore: moreAvailable } = await fetchProductosAdmin({
+              categoriaId: categoriaFiltro || undefined,
+              buscar: buscarQuery || undefined,
+              page,
+            })
+            setListProductos((prev) => [...prev, ...more])
+            setHasMore(moreAvailable)
+            setPage((p) => p + 1)
+          })
+        }
+      },
+      { rootMargin: '200px' }
+    )
+    const el = sentinelRef.current
+    if (el) observer.observe(el)
+    return () => { if (el) observer.unobserve(el) }
+  }, [hasMore, isPendingMore, isPendingFilter, page, categoriaFiltro, buscarQuery])
+
+  async function refetchList() {
+    const { productos: fresh, hasMore: more } = await fetchProductosAdmin({
+      categoriaId: categoriaFiltro || undefined,
+      buscar: buscarQuery || undefined,
+      page: 0,
+    })
+    setListProductos(fresh)
+    setHasMore(more)
+    setPage(1)
+  }
 
   function updateDraft(fields: Partial<Draft>) {
     setDraft((prev) => {
@@ -218,7 +283,7 @@ export default function ProductosList({
           toast.success(confirm.producto.activo ? 'Producto desactivado' : 'Producto activado')
         }
         setConfirm(null)
-        router.refresh()
+        await refetchList()
       } catch {
         toast.error('Ocurrió un error, intentá de nuevo')
       }
@@ -249,7 +314,7 @@ export default function ProductosList({
           toast.success('Producto creado')
         }
         handleClose()
-        router.refresh()
+        await refetchList()
       } catch {
         toast.error('Ocurrió un error, intentá de nuevo')
       }
@@ -257,23 +322,25 @@ export default function ProductosList({
   }
 
   const tieneDraft = !editando && (draft.nombre || draft.descripcion || draft.precio || draft.imagenes.length > 0)
+  const isFiltering = isPendingFilter
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-4">
+      {/* Toolbar */}
+      <div className="flex items-center gap-3 mb-3">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
             type="text"
-            value={buscar}
-            onChange={(e) => setBuscar(e.target.value)}
+            value={buscarInput}
+            onChange={(e) => setBuscarInput(e.target.value)}
             placeholder="Buscar productos..."
             className="w-full pl-9 pr-8 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
           />
-          {buscar && (
+          {buscarInput && (
             <button
               type="button"
-              onClick={() => setBuscar('')}
+              onClick={() => { setBuscarInput(''); setBuscarQuery('') }}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               <X className="w-3.5 h-3.5" />
@@ -282,20 +349,48 @@ export default function ProductosList({
         </div>
         <button
           onClick={handleNuevo}
-          className="ml-auto bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          className="ml-auto bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shrink-0"
         >
           + Nuevo producto
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        {productos.length === 0 ? (
+      {/* Category filter pills */}
+      {categorias.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-1 mb-4 scrollbar-hide">
+          <button
+            onClick={() => setCategoriaFiltro('')}
+            className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+              categoriaFiltro === ''
+                ? 'bg-brand-600 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Todas
+          </button>
+          {categorias.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setCategoriaFiltro(cat.id === categoriaFiltro ? '' : cat.id)}
+              className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                categoriaFiltro === cat.id
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {cat.nombre}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-opacity ${isFiltering ? 'opacity-50' : 'opacity-100'}`}>
+        {listProductos.length === 0 && !isFiltering ? (
           <div className="py-16 text-center text-gray-400">
-            <p>No hay productos aún</p>
-          </div>
-        ) : productosFiltrados.length === 0 ? (
-          <div className="py-16 text-center text-gray-400">
-            <p>Sin resultados para &ldquo;{buscar}&rdquo;</p>
+            {buscarQuery || categoriaFiltro
+              ? <p>Sin resultados para tu búsqueda</p>
+              : <p>No hay productos aún</p>
+            }
           </div>
         ) : (
           <>
@@ -314,7 +409,7 @@ export default function ProductosList({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {productosFiltrados.map((p) => (
+                  {listProductos.map((p) => (
                     <tr key={p.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div className="w-10 h-10 rounded-lg bg-brand-50 overflow-hidden relative flex-shrink-0">
@@ -366,7 +461,7 @@ export default function ProductosList({
 
             {/* Cards — mobile */}
             <div className="md:hidden divide-y divide-gray-50">
-              {productosFiltrados.map((p) => (
+              {listProductos.map((p) => (
                 <div key={p.id} className="p-4 flex gap-3">
                   <div className="w-16 h-16 rounded-xl bg-brand-50 overflow-hidden relative flex-shrink-0">
                     {p.imagenes?.[0] ? (
@@ -400,6 +495,17 @@ export default function ProductosList({
               ))}
             </div>
           </>
+        )}
+      </div>
+
+      {/* Sentinel + loader */}
+      <div ref={sentinelRef} className="flex justify-center py-6">
+        {isPendingMore && (
+          <div className="flex gap-1.5 items-center">
+            <span className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce [animation-delay:0ms]" />
+            <span className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce [animation-delay:150ms]" />
+            <span className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce [animation-delay:300ms]" />
+          </div>
         )}
       </div>
 
