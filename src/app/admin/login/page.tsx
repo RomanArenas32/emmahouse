@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
@@ -28,19 +29,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
+    <div className="fixed inset-0 bg-brand-50 flex items-center justify-center px-4 z-50">
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className="bg-white rounded-2xl shadow-md p-8 w-full max-w-sm"
       >
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-full bg-brand-600 flex items-center justify-center text-white font-bold text-xl mx-auto mb-3">
-            E
-          </div>
-          <h1 className="text-xl font-bold text-gray-800">EmmaHouse Admin</h1>
-          <p className="text-gray-500 text-sm mt-1">Ingresá con tu cuenta</p>
+        <div className="flex flex-col items-center mb-8">
+          <Image src="/logo2.webp" alt="Emma House" width={492} height={507} className="h-20 w-auto mb-4" priority />
+          <p className="text-gray-500 text-sm">Ingresá con tu cuenta</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
