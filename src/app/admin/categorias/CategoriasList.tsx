@@ -5,7 +5,7 @@ import type { Categoria } from '@/lib/supabase/types'
 import { crearCategoria, actualizarCategoria, eliminarCategoria } from '@/app/actions/categorias'
 import { useRouter } from 'next/navigation'
 import ConfirmModal from '@/app/admin/ConfirmModal'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, Search, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { toast } from 'sonner'
 
@@ -38,7 +38,12 @@ export default function CategoriasList({ categorias }: { categorias: Categoria[]
   const [draft, setDraft] = useState<Draft>(DRAFT_VACIO)
   const [isPending, startTransition] = useTransition()
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [buscar, setBuscar] = useState('')
   const router = useRouter()
+
+  const categoriasFiltradas = buscar.trim()
+    ? categorias.filter((c) => c.nombre.toLowerCase().includes(buscar.toLowerCase()))
+    : categorias
 
   function updateDraft(field: keyof Draft, value: string) {
     const next = { ...draft, [field]: value }
@@ -104,10 +109,29 @@ export default function CategoriasList({ categorias }: { categorias: Categoria[]
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            value={buscar}
+            onChange={(e) => setBuscar(e.target.value)}
+            placeholder="Buscar categorías..."
+            className="w-full pl-9 pr-8 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
+          />
+          {buscar && (
+            <button
+              type="button"
+              onClick={() => setBuscar('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
         <button
           onClick={handleNuevo}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          className="ml-auto bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
         >
           + Nueva categoría
         </button>
@@ -117,6 +141,10 @@ export default function CategoriasList({ categorias }: { categorias: Categoria[]
         {categorias.length === 0 ? (
           <div className="py-16 text-center text-gray-400">
             <p>No hay categorías aún</p>
+          </div>
+        ) : categoriasFiltradas.length === 0 ? (
+          <div className="py-16 text-center text-gray-400">
+            <p>Sin resultados para &ldquo;{buscar}&rdquo;</p>
           </div>
         ) : (
           <>
@@ -130,7 +158,7 @@ export default function CategoriasList({ categorias }: { categorias: Categoria[]
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {categorias.map((cat) => (
+                {categoriasFiltradas.map((cat) => (
                   <tr key={cat.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-800">{cat.nombre}</td>
                     <td className="px-4 py-3 text-gray-500">{cat.slug}</td>
@@ -151,7 +179,7 @@ export default function CategoriasList({ categorias }: { categorias: Categoria[]
 
             {/* Cards — mobile */}
             <div className="md:hidden divide-y divide-gray-50">
-              {categorias.map((cat) => (
+              {categoriasFiltradas.map((cat) => (
                 <div key={cat.id} className="px-4 py-3 flex items-center justify-between gap-3">
                   <div>
                     <p className="font-medium text-gray-800 text-sm">{cat.nombre}</p>

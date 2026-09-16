@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { Check, ChevronsUpDown, Pencil, Trash2 } from 'lucide-react'
+import { Check, ChevronsUpDown, Pencil, Trash2, Search, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import ConfirmModal from '@/app/admin/ConfirmModal'
 import { toast } from 'sonner'
@@ -149,10 +149,19 @@ export default function ProductosList({
   const [editando, setEditando] = useState<ProductoConCategoria | null>(null)
   const [draft, setDraft] = useState<Draft>(DRAFT_VACIO)
   const [isPending, startTransition] = useTransition()
+  const [buscar, setBuscar] = useState('')
   const router = useRouter()
 
   type Confirm = { tipo: 'toggle'; producto: ProductoConCategoria } | { tipo: 'delete'; id: string }
   const [confirm, setConfirm] = useState<Confirm | null>(null)
+
+  const productosFiltrados = buscar.trim()
+    ? productos.filter((p) =>
+        p.nombre.toLowerCase().includes(buscar.toLowerCase()) ||
+        p.categoria?.nombre.toLowerCase().includes(buscar.toLowerCase()) ||
+        p.descripcion?.toLowerCase().includes(buscar.toLowerCase())
+      )
+    : productos
 
   function updateDraft(fields: Partial<Draft>) {
     setDraft((prev) => {
@@ -251,10 +260,29 @@ export default function ProductosList({
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            value={buscar}
+            onChange={(e) => setBuscar(e.target.value)}
+            placeholder="Buscar productos..."
+            className="w-full pl-9 pr-8 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
+          />
+          {buscar && (
+            <button
+              type="button"
+              onClick={() => setBuscar('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
         <button
           onClick={handleNuevo}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          className="ml-auto bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
         >
           + Nuevo producto
         </button>
@@ -264,6 +292,10 @@ export default function ProductosList({
         {productos.length === 0 ? (
           <div className="py-16 text-center text-gray-400">
             <p>No hay productos aún</p>
+          </div>
+        ) : productosFiltrados.length === 0 ? (
+          <div className="py-16 text-center text-gray-400">
+            <p>Sin resultados para &ldquo;{buscar}&rdquo;</p>
           </div>
         ) : (
           <>
@@ -282,7 +314,7 @@ export default function ProductosList({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {productos.map((p) => (
+                  {productosFiltrados.map((p) => (
                     <tr key={p.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div className="w-10 h-10 rounded-lg bg-brand-50 overflow-hidden relative flex-shrink-0">
@@ -334,7 +366,7 @@ export default function ProductosList({
 
             {/* Cards — mobile */}
             <div className="md:hidden divide-y divide-gray-50">
-              {productos.map((p) => (
+              {productosFiltrados.map((p) => (
                 <div key={p.id} className="p-4 flex gap-3">
                   <div className="w-16 h-16 rounded-xl bg-brand-50 overflow-hidden relative flex-shrink-0">
                     {p.imagenes?.[0] ? (
